@@ -1,0 +1,18 @@
+{
+  "type": "turn_result",
+  "session_id": "demo-session",
+  "speaker": "scammer",
+  "text": "This is a simulated training call.",
+  "audio_url": null,
+  "scenario_state": "authority",
+  "detected_tactics": [
+    "authority"
+  ],
+  "risk_level": 0.25,
+  "available_actions": [
+    "continue",
+    "request_verification",
+    "end_call"
+  ],
+  "is_complete": false
+}

@@ -1,0 +1,31 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "input_mode": {
+      "default": "text",
+      "enum": [
+        "text",
+        "voice"
+      ],
+      "title": "Input Mode",
+      "type": "string"
+    },
+    "text": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Text",
+      "type": "string"
+    },
+    "type": {
+      "const": "participant_turn",
+      "default": "participant_turn",
+      "title": "Type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "text"
+  ],
+  "title": "ParticipantTurn",
+  "type": "object"
+}

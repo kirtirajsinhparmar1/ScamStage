@@ -1,0 +1,97 @@
+{
+  "$defs": {
+    "Action": {
+      "enum": [
+        "continue",
+        "request_verification",
+        "end_call"
+      ],
+      "title": "Action",
+      "type": "string"
+    },
+    "ScenarioState": {
+      "enum": [
+        "intro",
+        "authority",
+        "urgency",
+        "verification",
+        "completed"
+      ],
+      "title": "ScenarioState",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "audio_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Audio Url"
+    },
+    "available_actions": {
+      "items": {
+        "$ref": "#/$defs/Action"
+      },
+      "title": "Available Actions",
+      "type": "array"
+    },
+    "detected_tactics": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Detected Tactics",
+      "type": "array"
+    },
+    "is_complete": {
+      "title": "Is Complete",
+      "type": "boolean"
+    },
+    "risk_level": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Risk Level",
+      "type": "number"
+    },
+    "scenario_state": {
+      "$ref": "#/$defs/ScenarioState"
+    },
+    "session_id": {
+      "minLength": 1,
+      "title": "Session Id",
+      "type": "string"
+    },
+    "speaker": {
+      "const": "scammer",
+      "default": "scammer",
+      "title": "Speaker",
+      "type": "string"
+    },
+    "text": {
+      "title": "Text",
+      "type": "string"
+    },
+    "type": {
+      "const": "turn_result",
+      "default": "turn_result",
+      "title": "Type",
+      "type": "string"
+    }
+  },
+  "required": [
+    "session_id",
+    "text",
+    "scenario_state",
+    "risk_level",
+    "available_actions",
+    "is_complete"
+  ],
+  "title": "TurnResult",
+  "type": "object"
+}
