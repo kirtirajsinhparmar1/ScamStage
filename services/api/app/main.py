@@ -5,8 +5,11 @@ from app.api.dependencies import build_providers
 from app.api.routes.diagnostics import router as diagnostics_router
 from app.api.routes.health import router as health_router
 from app.api.routes.sessions import router as sessions_router
+from app.api.routes.stream import router as stream_router
 from app.core.config import Settings
 from app.database.memory import InMemorySessionRepository
+from app.scenarios.dialog import ScenarioDialogResponder
+from app.services.scenario_engine import ScenarioEngine
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -17,6 +20,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.state.classifier = classifier
     application.state.voice = voice
     application.state.session_repo = InMemorySessionRepository()
+    application.state.scenario_engine = ScenarioEngine()
+    application.state.dialog_responder = ScenarioDialogResponder()
     application.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -26,6 +31,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(health_router, prefix="/api")
     application.include_router(sessions_router, prefix="/api")
     application.include_router(diagnostics_router, prefix="/api")
+    application.include_router(stream_router, prefix="/api")
     return application
 
 

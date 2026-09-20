@@ -69,10 +69,11 @@ The planned API is:
 | Route | Status |
 | --- | --- |
 | GET /api/health | Implemented |
-| POST /api/sessions | Planned |
-| POST /api/sessions/{id}/end | Planned |
+| POST /api/sessions | Implemented |
+| POST /api/sessions/{id}/end | Implemented |
+| GET /api/diagnostics/providers | Implemented |
+| WS /api/sessions/{id}/stream | Implemented |
 | GET /api/sessions/{id}/debrief | Planned |
-| WS /api/sessions/{id}/stream | Planned |
 
 Tests use FastAPI's [TestClient](https://fastapi.tiangolo.com/tutorial/testing/).
 Dependencies use uv's [locked sync workflow](https://docs.astral.sh/uv/concepts/projects/sync/).
