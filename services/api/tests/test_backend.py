@@ -59,8 +59,25 @@ def test_fake_providers_are_wired_without_credentials():
 
 
 def test_real_provider_flag_fails_explicitly():
-    with pytest.raises(ValueError, match="not implemented"):
+    with pytest.raises(ValueError, match="NVIDIA_API_KEY must be set"):
         create_app(Settings(_env_file=None, use_mock_classifier=False))
+
+
+def test_real_voice_flag_fails_without_key():
+    with pytest.raises(ValueError, match="ELEVENLABS_API_KEY must be set"):
+        create_app(Settings(_env_file=None, use_mock_voice=False))
+
+
+def test_diagnostics_with_fake_providers():
+    with TestClient(create_app(Settings(_env_file=None))) as client:
+        response = client.get("/api/diagnostics/providers")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["classifier_ok"] is True
+        assert data["voice_ok"] is True
+        assert data["classifier_error"] is None
+        assert data["voice_error"] is None
+        assert data["classifier_result"]["participant_intent"] == "skeptical"
 
 
 @pytest.mark.parametrize(

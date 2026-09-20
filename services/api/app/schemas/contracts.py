@@ -36,3 +36,9 @@ class TurnResult(Contract):
     risk_level: float = Field(ge=0, le=1)
     available_actions: list[Action]
     is_complete: bool
+
+
+class SessionResponse(Contract):
+    id: str = Field(min_length=1)
+    status: Literal["active", "ended"] = "active"
+    scenario_state: ScenarioState
