@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 
 from .classification import ParticipantClassification
+from .evaluation import EvaluationStatus, IndependentEvaluation
 from .session import ScenarioStage, ScenarioState
 from .turn import ClassifierFallbackReason
 
@@ -16,8 +17,11 @@ class SessionResponse(BaseModel):
     voice_fallback: bool
     simulation_notice: str = SIMULATION_NOTICE
     risk_score: float
+    interaction_mode: str = 'text'
     scenario_name: str = 'Fictional bank fraud'
     tactics_triggered: list[str] = Field(default_factory=lambda: ['authority'])
+    dialogue_provider: str = 'authored_fallback'
+    dialogue_fallback: bool = True
 
 
 class Debrief(BaseModel):
@@ -25,6 +29,11 @@ class Debrief(BaseModel):
     outcome: str
     summary: str
     safer_response_guidance: list[str]
+    completion_reason: str | None = None
+    tactics_observed: list[str] = Field(default_factory=list)
+    evaluation_status: EvaluationStatus | None = None
+    evaluation_provider: str | None = None
+    evaluation_result: IndependentEvaluation | None = None
 
 
 class TurnResponse(BaseModel):
@@ -45,6 +54,12 @@ class TurnResponse(BaseModel):
     completed: bool
     risk_before: float = Field(default=0.2, ge=0, le=1)
     debrief: Debrief | None = None
+    input_mode: str = 'text'
+    classifier_attempted: bool = False
+    classifier_attempted_provider: str | None = None
+    dialogue_provider: str = 'authored_fallback'
+    dialogue_fallback: bool = True
+    dialogue_fallback_reason: str | None = None
 
 
 class SessionDetail(ScenarioState):

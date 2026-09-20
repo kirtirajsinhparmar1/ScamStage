@@ -97,7 +97,8 @@ class ApiChecks(unittest.TestCase):
     def setUp(self):
         self.audio = TemporaryDirectory(prefix='scamstage-tests-')
         self.addCleanup(self.audio.cleanup)
-        settings = Settings(_env_file=None, nemotron_api_key='', elevenlabs_api_key='',
+        settings = Settings(_env_file=None, dialogue_provider='authored', ollama_enabled=False,
+                            nemotron_api_key='', elevenlabs_api_key='',
                             elevenlabs_voice_id='', audio_dir=Path(self.audio.name))
         self.app = create_app(settings)
         self.client = self.enterContext(TestClient(self.app))

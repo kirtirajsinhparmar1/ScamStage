@@ -20,3 +20,4 @@ class ScenarioDecision(BaseModel):
     tactics_triggered: list[str]
     risk_score: float = Field(ge=0, le=1)
     completed: bool
+    completion_reason: str | None = None

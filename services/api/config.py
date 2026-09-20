@@ -8,6 +8,8 @@ ROOT = Path(__file__).resolve().parents[2]
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=ROOT / '.env', extra='ignore')
+    host: str = '127.0.0.1'
+    port: int = Field(default=8000, ge=1, le=65535)
     nemotron_base_url: str = 'https://integrate.api.nvidia.com/v1'
     nemotron_api_key: str = Field(default='', repr=False)
     nemotron_model: str = 'nvidia/nemotron-3.5-lightning-30b-a3b'
@@ -18,6 +20,18 @@ class Settings(BaseSettings):
     nemotron_connect_timeout_seconds: float = Field(default=5, gt=0, le=10)
     nemotron_write_timeout_seconds: float = Field(default=10, gt=0, le=15)
     nemotron_pool_timeout_seconds: float = Field(default=5, gt=0, le=10)
+    gemini_api_key: str = Field(default='', repr=False)
+    gemini_enabled: bool = False
+    gemini_model: str = ''
+    gemini_timeout_seconds: float = Field(default=2.5, gt=0, le=10)
+    gemini_base_url: str = 'https://generativelanguage.googleapis.com'
+    dialogue_provider: str = 'ollama'
+    ollama_enabled: bool = True
+    ollama_base_url: str = 'http://127.0.0.1:11434'
+    ollama_model: str = 'qwen3:4b'
+    ollama_timeout_seconds: float = Field(default=8, gt=0, le=30)
+    ollama_keep_alive: str = '30m'
+    nemotron_evaluation_timeout_seconds: float = Field(default=5, gt=0, le=30)
     elevenlabs_api_key: str = Field(default='', repr=False)
     elevenlabs_voice_id: str = ''
     elevenlabs_model_id: str = 'eleven_multilingual_v2'
