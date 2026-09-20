@@ -3,35 +3,472 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>SCAMSTAGE · Practice spotting the pressure</title>
+    <title>SCAM STAGE · Metropolitan Fraud & Cybercrime Bureau</title>
     <link rel="stylesheet" href="/src/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   </head>
   <body>
-    <main>
-      <header><span class="eyebrow">STEELHACKS XIII · FRAUD AWARENESS LAB</span><h1>SCAMSTAGE<span>.</span></h1><p class="intro">Practice spotting the pressure.<br>See how a scam changes when you respond.</p></header>
-      <div class="notice"><strong>Fictional training simulation</strong><p>Every organization and conversation in this lab is invented. Voices are synthetic. Never enter personal information, passwords, account details, payment details, or real one-time codes. Use only fictional responses.</p></div>
-      <div class="workspace">
-        <section class="conversation" aria-labelledby="conversation-heading">
-          <div class="scenario-picker"><label for="scenario">Choose a practice scenario</label><select id="scenario" aria-describedby="scenario-description" disabled><option value="">Loading scenarios…</option></select><p id="scenario-description" class="muted">Explore how different fictional callers respond to your choices.</p></div>
-          <div class="section-heading"><h2 id="conversation-heading">The conversation</h2><div class="primary-actions"><button id="start" disabled>Start simulation</button><button id="start-voice" class="call-button" disabled>Start voice call</button></div></div>
-          <p id="selected-scenario" class="muted">No active scenario</p>
-          <section id="voice-call" class="voice-call" aria-labelledby="voice-heading" hidden>
-            <div class="call-header"><div id="caller-avatar" class="caller-avatar" aria-hidden="true">LV</div><div><span class="eyebrow">FICTIONAL INCOMING CALL</span><h2 id="voice-heading">Lumenvale Demo Credit Union</h2><p class="muted">Synthetic caller · training only</p></div><div class="call-meta"><strong id="call-status">Ready</strong><span id="call-meta-value">Turn 0 · 0:00</span></div></div>
-            <p class="call-safety">Browser-based voice turn-taking simulates a live conversation. No raw microphone audio is stored by SCAMSTAGE; only the recognized transcript is sent to the simulation. Use fictional responses only.</p>
-            <div class="voice-transcript" aria-live="polite"><span class="eyebrow">LIVE TRANSCRIPT</span><p id="voice-interim" class="interim">Listening starts after the caller finishes.</p><span class="eyebrow">CONFIRMED RESPONSE</span><p id="voice-confirmed">No response captured yet.</p></div>
-            <div class="call-controls"><button id="voice-replay" type="button" class="secondary" disabled>Replay caller response</button><button id="voice-continue" type="button" class="secondary" hidden>Continue to listening</button><button id="voice-pause" type="button" class="secondary" disabled>Pause call</button><button id="voice-retry" type="button" class="secondary" hidden>Retry caller response</button><button id="voice-end" type="button" class="end-call" disabled>End call safely</button></div>
-            <div class="voice-secondary"><button id="voice-text-fallback" type="button" class="secondary">Use text instead</button><p id="voice-support" class="muted" role="status">Speech recognition is checked when the call starts.</p></div>
-          </section>
-          <div id="transcript" role="log" aria-live="polite" aria-label="Conversation transcript"><p class="empty">Choose a scenario and start a simulation. Your choices determine what happens next.</p></div>
-          <section id="debrief" class="debrief" aria-labelledby="debrief-heading" hidden><h2 id="debrief-heading">Training debrief</h2><p id="debrief-outcome"></p><p id="debrief-summary"></p><p id="debrief-tactics" class="debrief-tactics"></p><p id="debrief-risk"></p><h3>Boundaries you set</h3><ul id="debrief-boundaries"></ul><p id="debrief-verification"></p><h3>Timeline evidence</h3><ul id="debrief-evidence"></ul><h3>Safer response guidance</h3><ul id="debrief-guidance"></ul><section id="evaluation-card" class="evaluation-card" aria-labelledby="evaluation-heading" hidden><h3 id="evaluation-heading">Independent review</h3><p id="evaluation-status" class="evaluation-status"></p><p id="evaluation-summary"></p><p id="evaluation-safety"></p><p id="evaluation-tactics" class="debrief-tactics"></p><p id="evaluation-risk"></p><p id="evaluation-confidence" class="muted"></p><ul id="evaluation-evidence"></ul></section><button id="another-scenario" type="button" class="secondary">Try another scenario</button></section>
-          <div class="playback"><label for="audio">Latest synthetic response</label><audio id="audio" controls preload="none" hidden></audio><p id="audio-status">Audio appears here when available.</p></div>
-          <form id="turn-form"><label for="participant-text">Your fictional response</label><textarea id="participant-text" maxlength="1000" rows="3" placeholder="For example: I will call the number on my card instead." disabled required></textarea><div class="form-footer"><small>Typed input always works. Keep responses fictional.</small><div><button id="microphone" type="button" class="secondary" disabled>Use microphone</button><button id="send" type="submit" disabled>Send response</button><button id="text-retry" type="button" class="secondary" hidden>Retry caller response</button><button id="text-end" type="button" class="end-call" hidden>End call safely</button></div></div></form>
-          <p id="status" role="status" aria-live="polite">Ready when you are.</p>
-        </section>
-        <aside aria-label="Decision evidence"><section class="insight"><span class="eyebrow">VISIBLE DECISIONS</span><h2>Inside the simulation</h2><p class="muted">The fast safety policy records a rolling pressure strategy. Ollama writes only the next fictional caller line.</p><label for="risk">Scenario risk <strong id="risk-value">0%</strong></label><progress id="risk" max="1" value="0"></progress><p class="muted">Training indicator, not a personal assessment.</p><dl><dt>Current strategy</dt><dd id="stage">Not started</dd><dt>Caller tactics</dt><dd id="tactics">—</dd><dt>Response classification</dt><dd id="intent">—</dd><dt>Evidence from your response</dt><dd><q id="evidence">—</q></dd><dt>Provider status</dt><dd id="providers">Waiting for a session</dd></dl></section><section class="insight"><h2>Call timeline</h2><ol id="timeline"><li>No decisions yet</li></ol></section></aside>
-      </div>
-      <footer>Pause whenever you need. This is a learning exercise, and no real bank or payment system is connected.</footer>
+    <!-- Atmospheric Background Overlay -->
+    <div class="game-backdrop" aria-hidden="true"></div>
+
+    <main class="game-wrapper">
+      <!-- Top Police Bureau Header Bar -->
+      <header class="bureau-bar">
+        <div class="bureau-left">
+          <div class="police-shield-icon" title="Metropolitan Police Cyber Defense Badge">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.54-3.1 8.79-7 9.88-3.9-1.09-7-5.34-7-9.88V6.3l7-3.12z"/>
+              <circle cx="12" cy="11" r="3"/>
+            </svg>
+          </div>
+          <div class="bureau-identity">
+            <span class="bureau-sub">METROPOLITAN INVESTIGATION SQUAD</span>
+            <span class="bureau-title">SCAM STAGE · FRAUD UNIT #409</span>
+          </div>
+        </div>
+
+        <div class="bureau-center">
+          <div class="wiretap-status-pill">
+            <span class="pulse-beacon"></span>
+            <span id="wiretap-status-text">WIRETAP SATELLITE ONLINE · 11LABS VOICE</span>
+          </div>
+        </div>
+
+        <div class="bureau-right">
+          <span class="badge-tag">STEELHACKS XIII</span>
+          <span class="badge-tag tag-fictional">CLASSIFIED SANDBOX</span>
+        </div>
+      </header>
+
+      <!-- Department Training Notice Bar (Compact) -->
+      <aside class="notice bureau-notice" role="note">
+        <span class="police-tape-accent" aria-hidden="true">POLICE LINE DO NOT CROSS · SCAM DEFENSE LAB · POLICE LINE DO NOT CROSS</span>
+        <div class="notice-content">
+          <strong class="notice-headline">⚠️ Training Sandbox</strong>
+          <span class="notice-brief">All personas, credentials, and wiretaps are synthetic training simulations. Never share real passwords, codes, or bank details.</span>
+        </div>
+      </aside>
+
+      <!-- Hidden Global Status for Contract/Script Compatibility -->
+      <div id="status" class="visually-hidden-status" aria-live="polite">Bureau dispatch ready</div>
+      <div id="screen-home" style="display:none;"></div>
+      <span id="voice-heading" style="display:none;"></span>
+
+      <!-- =================================================================== -->
+      <!-- SCREEN 0: TITLE SCREEN (SCAM STAGE Hero + PLAY NOW)                 -->
+      <!-- =================================================================== -->
+      <section id="screen-title" class="screen-container title-screen">
+        <div class="hero-center-box">
+          <!-- 3D Chrome SCAM STAGE Title Logo -->
+          <div class="game-logo-container">
+            <div class="criminal-case-logo">
+              <div class="logo-top-row">
+                <span class="logo-letter">S</span>
+                <span class="logo-letter">C</span>
+                <span class="logo-letter">A</span>
+                <span class="logo-letter">M</span>
+              </div>
+              <div class="logo-bottom-row">
+                <span class="logo-subletter">S</span>
+                <span class="logo-subletter">T</span>
+                <span class="logo-subletter">A</span>
+                <span class="logo-subletter">G</span>
+                <span class="logo-subletter">E</span>
+                <div class="magnifier-badge" title="Forensic Magnifier">
+                  <svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="10.5" cy="10.5" r="7.5"/>
+                    <line x1="16" y1="16" x2="22" y2="22"/>
+                    <!-- Digital Fingerprint within lens -->
+                    <path d="M8 10a2.5 2.5 0 0 1 5 0" stroke-width="1.5" stroke="#38bdf8"/>
+                    <path d="M6.5 10.5a4 4 0 0 1 8 0" stroke-width="1.5" stroke="#38bdf8"/>
+                    <path d="M9 13a1.5 1.5 0 0 1 3 0" stroke-width="1.5" stroke="#38bdf8"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <p class="game-tagline">CYBER FRAUD DIVISION · FORENSIC DECEPTION INTERROGATOR</p>
+            <p class="game-subtagline">Step into the shoes of a lead investigator. Interrogate dynamic scam syndicates, spot psychological manipulation in real-time, and close the case.</p>
+          </div>
+
+          <!-- Feature Tech Pills -->
+          <div class="hero-tech-pills">
+            <div class="tech-pill">
+              <span class="pill-icon">🎙️</span>
+              <span class="pill-label">ElevenLabs Real Voice</span>
+            </div>
+            <div class="tech-pill">
+              <span class="pill-icon">🧠</span>
+              <span class="pill-label">NVIDIA Nemotron AI</span>
+            </div>
+            <div class="tech-pill">
+              <span class="pill-icon">⭐</span>
+              <span class="pill-label">5-Star Detective Ranking</span>
+            </div>
+          </div>
+
+          <!-- Primary PLAY NOW CTA Button -->
+          <div class="play-cta-wrapper">
+            <button id="play-now-btn" class="btn-play-now" type="button">
+              <span class="play-radar-pulse" aria-hidden="true"></span>
+              <span class="play-icon">▶</span>
+              <span class="play-text">PLAY NOW</span>
+              <span class="play-badge">CLASSIFIED CASES</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- SCREEN 1: CASE SELECTION DESK (Fictional Cases Dossiers)             -->
+      <!-- =================================================================== -->
+      <section id="screen-cases" class="screen-container cases-screen" hidden>
+        <div class="cases-board-container">
+          <div class="board-top-nav">
+            <button id="btn-back-title" class="btn-subtle-back" type="button">
+              <span class="arrow">←</span> MAIN MENU
+            </button>
+            <div class="board-title-group">
+              <span class="eyebrow board-eyebrow">DEPARTMENT ACTIVE INVESTIGATIONS</span>
+              <h2 class="board-heading">SELECT A CASE FILE</h2>
+            </div>
+            <span class="active-badge-indicator" id="case-counter">3 ACTIVE DOSSIERS</span>
+          </div>
+
+          <!-- Contract scenario select (Accessible to test harness) -->
+          <div class="contract-select-wrapper" style="position: absolute; opacity: 0; pointer-events: none; height: 0; overflow: hidden;">
+            <label for="scenario">Select Scenario</label>
+            <select id="scenario" name="scenario"></select>
+          </div>
+
+          <!-- Dynamic Detective Case Dossier Grid -->
+          <div id="case-dossier-grid" class="case-grid-compact" role="list">
+            <!-- Dynamically populated by app.js with rich Criminal Case styled folder cards -->
+          </div>
+
+          <!-- Selected Case Dossier Briefing & Launch Actions -->
+          <div class="case-brief-bar">
+            <div class="brief-summary-box">
+              <div class="brief-label" id="selected-scenario">CASE DOSSIER: FICTIONAL BANK FRAUD</div>
+              <p class="brief-text" id="scenario-description">Loading classified investigation briefing from department archives...</p>
+            </div>
+
+            <div class="brief-actions">
+              <button id="start-voice" class="btn-detective-action btn-wiretap-tap" type="button">
+                <span class="action-icon">📞</span>
+                <span class="action-body">
+                  <strong>TAP THE WIRETAP CALL</strong>
+                  <small>ElevenLabs Real Audio Simulation</small>
+                </span>
+              </button>
+
+              <button id="start" class="btn-detective-action btn-text-interrogate" type="button">
+                <span class="action-icon">💬</span>
+                <span class="action-body">
+                  <strong>TEXT INTERROGATION</strong>
+                  <small>Silent Terminal Channel</small>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- SCREEN 2: ACTIVE WIRETAP INTERROGATION COCKPIT                      -->
+      <!-- =================================================================== -->
+      <section id="screen-call" class="screen-container call-screen" hidden>
+        <!-- Contract voice-call wrapper -->
+        <div id="voice-call" class="wiretap-cockpit">
+          <!-- Left Column: Suspect Dossier & Audio Spectrum -->
+          <aside class="suspect-column">
+            <div class="suspect-dossier-panel">
+              <div class="panel-header-badge">
+                <span class="classified-pill">CONFIDENTIAL</span>
+                <span class="channel-pill" id="call-status">WIRETAP FEED #88</span>
+                <span id="call-meta-value" class="meta-tag" hidden></span>
+              </div>
+
+              <div class="suspect-avatar-box">
+                <div class="suspect-avatar-ring">
+                  <div class="suspect-avatar-inner" id="caller-avatar">
+                    <span class="suspect-avatar-initials" id="suspect-avatar-initials">SC</span>
+                  </div>
+                  <div class="radar-ping" aria-hidden="true"></div>
+                </div>
+                <div class="suspect-meta">
+                  <h3 class="suspect-title" id="suspect-org-title">SUSPECT PROFILE</h3>
+                  <span class="suspect-alias" id="suspect-alias-text">Target: Lumenvale Demo Credit Union</span>
+                  <span id="caller-sub" class="suspect-alias" hidden></span>
+                </div>
+              </div>
+
+              <!-- Threat Risk Telemetry Gauge -->
+              <div class="threat-gauge-card">
+                <div class="threat-header">
+                  <span class="threat-label">PSYCHOLOGICAL THREAT LEVEL</span>
+                  <span class="threat-value" id="threat-level-value">INITIAL CONTACT</span>
+                  <span id="risk-value" class="threat-value" style="display:none;">25%</span>
+                  <meter id="risk" min="0" max="1" value="0.25" style="display:none;"></meter>
+                </div>
+                <div class="threat-bar-track">
+                  <div class="threat-bar-fill" id="threat-bar-fill" style="width: 25%;"></div>
+                </div>
+                <div class="threat-meta-row">
+                  <span class="threat-desc" id="threat-indicator-desc">Suspect is establishing authority</span>
+                  <span id="stage" class="stage-tag">authority</span>
+                </div>
+                <div class="threat-hidden-pills" style="display: none;">
+                  <span id="intent">—</span>
+                  <span id="evidence">—</span>
+                  <span id="tactics">—</span>
+                </div>
+              </div>
+
+              <!-- Police Wiretap Audio Visualizer -->
+              <div class="wiretap-spectrum-box">
+                <div class="spectrum-header">
+                  <span class="spectrum-dot"></span>
+                  <span class="spectrum-title" id="audio-wave-label">POLICE AUDIO FREQUENCY SPECTRUM</span>
+                </div>
+                <div class="spectrum-visualizer" id="audio-wave-visualizer" aria-hidden="true">
+                  <span class="spec-bar"></span><span class="spec-bar"></span>
+                  <span class="spec-bar"></span><span class="spec-bar"></span>
+                  <span class="spec-bar"></span><span class="spec-bar"></span>
+                  <span class="spec-bar"></span><span class="spec-bar"></span>
+                  <span class="spec-bar"></span><span class="spec-bar"></span>
+                  <span class="spec-bar"></span><span class="spec-bar"></span>
+                  <span class="spec-bar"></span><span class="spec-bar"></span>
+                  <span class="spec-bar"></span><span class="spec-bar"></span>
+                </div>
+                <!-- Audio Element for Live ElevenLabs Synthesis -->
+                <audio id="audio" controls class="wiretap-audio-player"></audio>
+                <div id="audio-status" class="audio-feedback-badge">Audio appears here when available</div>
+                <div id="voice-support" class="voice-support-text" style="display:none;"></div>
+                <div id="voice-interim" style="display:none;"></div>
+                <div id="voice-confirmed" style="display:none;"></div>
+              </div>
+
+              <!-- Safe Exit / Hangup Action -->
+              <div class="call-control-box">
+                <button id="voice-end" class="btn-police-hangup" type="button">
+                  <span class="hangup-icon">🛑</span>
+                  <span>TERMINATE WIRETAP / SAFE EXIT</span>
+                </button>
+                <div class="secondary-voice-actions">
+                  <button id="voice-text-fallback" class="btn-subtle-switch" type="button">Switch to Text Terminal</button>
+                  <button id="voice-replay" class="btn-subtle-switch" type="button" style="display:none;">Replay</button>
+                  <button id="voice-continue" class="btn-subtle-switch" type="button" style="display:none;">Continue</button>
+                  <button id="voice-pause" class="btn-subtle-switch" type="button" style="display:none;">Pause</button>
+                  <button id="voice-retry" class="btn-subtle-switch" type="button" style="display:none;">Retry</button>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Right Column: Interrogation Command Center -->
+          <div class="interrogation-column">
+            <!-- Intercept Stream / Dialogue Bubble -->
+            <div class="suspect-speech-stream">
+              <div class="intercept-header">
+                <div class="intercept-label-group">
+                  <span class="intercept-badge">LIVE INTERCEPT</span>
+                  <span class="intercept-time" id="call-timer">00:14</span>
+                </div>
+                <div class="intercept-tactics" id="tactics-list">
+                  <span class="tactic-tag">Authority Claim</span>
+                </div>
+              </div>
+
+              <div class="suspect-message-card">
+                <div class="speaker-label">
+                  <span class="speaker-role">SUSPECT CALLER</span>
+                  <span class="voice-badge">SYNTHETIC PERSONA</span>
+                </div>
+                <p id="live-suspect-bubble" class="suspect-intercept-quote">
+                  "Connecting wiretap intercept... standby for audio incoming from target frequency."
+                </p>
+                <span id="scammer-text-content" style="display:none;">"Connecting wiretap intercept..."</span>
+              </div>
+            </div>
+
+            <!-- Detective Interrogation Cockpit -->
+            <div class="detective-cockpit-card">
+              <!-- Tactical Interrogation Response Chips -->
+              <div class="tactical-chips-bar">
+                <span class="chips-title">TACTICAL DEFENSE CHIPS:</span>
+                <div class="chips-list">
+                  <button type="button" class="tactic-chip" data-text="Can you provide your official badge number, direct extension, and department supervisor?">
+                    🛡️ Demand Badge & Extension
+                  </button>
+                  <button type="button" class="tactic-chip" data-text="I will not share verification codes over an unsolicited incoming call. I am calling the official number myself.">
+                    🛑 Refuse Code & Hang Up
+                  </button>
+                  <button type="button" class="tactic-chip" data-text="What is your callback number so I can cross-reference it with the verified website?">
+                    🔍 Verify Callback Number
+                  </button>
+                </div>
+              </div>
+
+              <!-- Contract Interrogation Turn Form -->
+              <form id="turn-form" class="interrogation-input-form" aria-busy="false">
+                <div class="input-row-detective">
+                  <div class="input-shell">
+                    <input 
+                      id="participant-text" 
+                      name="participant_text" 
+                      type="text" 
+                      class="detective-text-field" 
+                      placeholder="Type your response to the suspect or select a tactical defense chip above..." 
+                      autocomplete="off"
+                      maxlength="300"
+                    >
+                  </div>
+
+                  <button id="microphone" class="btn-police-radio-mic" type="button" title="Push-to-Talk Detective Radio Microphone">
+                    <span class="mic-wave" aria-hidden="true"></span>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                      <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                    </svg>
+                  </button>
+
+                  <button id="send" class="btn-send-interrogate" type="submit">
+                    <span>SEND</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <div class="action-fallback-row">
+                  <button id="text-end" class="btn-subtle-end" type="button" hidden>End Interrogation Call</button>
+                  <button id="text-retry" class="btn-subtle-retry" type="button" hidden>Retry Caller Response</button>
+                </div>
+              </form>
+
+              <!-- Compact Investigation Transcript Log -->
+              <div class="investigation-log-panel">
+                <div class="log-panel-header">
+                  <span class="log-title">INVESTIGATION TRANSCRIPT LOG</span>
+                  <span class="log-pill" id="log-turn-counter">0 TURNS</span>
+                </div>
+                <div id="transcript" class="transcript-compact-feed" role="log" aria-live="polite">
+                  <div class="empty-log-state">Wiretap initialized. Detective remarks and caller dialogue will be recorded here.</div>
+                </div>
+              </div>
+
+              <!-- Systems & AI Provider Telemetry (Contract compliant) -->
+              <div id="providers" class="system-providers-telemetry">
+                Safety policy: fast_safety_policy · Caller dialogue: Ollama (qwen3:4b) · Voice: ElevenLabs · Evaluator: Nemotron
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================== -->
+      <!-- SCREEN 3: CASE CLOSED DEBRIEF & DETECTIVE RATING                    -->
+      <!-- =================================================================== -->
+      <section id="screen-score" class="screen-container score-screen" hidden>
+        <!-- Contract debrief container -->
+        <div id="debrief" class="case-closed-card" hidden>
+          <!-- Criminal Case Golden Banner -->
+          <div class="case-closed-ribbon">
+            <span class="ribbon-text" id="debrief-heading">CASE CLOSED</span>
+            <span id="score-heading" style="display:none;">Investigation Report</span>
+          </div>
+
+          <div class="debrief-layout-grid">
+            <!-- Left Side: Detective Honor Badge & Verdict -->
+            <div class="honor-badge-box">
+              <div class="detective-stars-container" id="star-rating-container">
+                <div class="stars-row" id="detective-stars" aria-label="5 Star Rating">
+                  <span class="star-gold">★</span>
+                  <span class="star-gold">★</span>
+                  <span class="star-gold">★</span>
+                  <span class="star-gold">★</span>
+                  <span class="star-gold">★</span>
+                </div>
+                <span class="detective-rank-name" id="detective-rank-title">CHIEF INSPECTOR</span>
+                <span class="detective-rank-sub">METROPOLITAN CYBER FRAUD SPECIALIST</span>
+              </div>
+
+              <!-- Criminal Case Rubber Stamp -->
+              <div class="rubber-stamp" id="debrief-outcome-stamp">
+                <span class="stamp-inner" id="debrief-outcome">FRAUD PREVENTED</span>
+                <span id="stamp-verdict" style="display:none;">SAFE EXIT</span>
+              </div>
+
+              <div class="case-completed-meta">
+                <span id="case-closed-id">CASE #SS-2026</span>
+                <span id="debrief-summary">Official debriefing logged</span>
+                <span id="debrief-verification" style="display:none;"></span>
+                <span id="debrief-risk" style="display:none;"></span>
+                <span id="debrief-tactics" style="display:none;"></span>
+              </div>
+            </div>
+
+            <!-- Right Side: Performance Breakdown & Timeline -->
+            <div class="case-metrics-column">
+              <div class="metrics-cards-grid">
+                <div class="metric-card">
+                  <span class="metric-eyebrow">FINAL RISK LEVEL</span>
+                  <span class="metric-big-val" id="metric-final-risk">LOW</span>
+                  <span class="metric-sub" id="metric-risk-desc">Credentials Secured</span>
+                </div>
+                <div class="metric-card">
+                  <span class="metric-eyebrow">DEFENSE BOUNDARIES</span>
+                  <span class="metric-big-val" id="metric-boundaries-count">3</span>
+                  <span class="metric-sub">Protective Verifications</span>
+                </div>
+                <div class="metric-card">
+                  <span class="metric-eyebrow">PRESSURE RESISTANCE</span>
+                  <span class="metric-big-val" id="metric-pressure-grade">100%</span>
+                  <span class="metric-sub">Zero Coercion Given</span>
+                </div>
+              </div>
+
+              <!-- Forensic Evidence & Protection Timeline -->
+              <div class="evidence-timeline-box">
+                <span class="evidence-title">FORENSIC TIMELINE & INVESTIGATION ACTIONS</span>
+                <ol id="timeline" class="timeline-compact-list">
+                  <li>Investigation initiated on secure department wiretap.</li>
+                </ol>
+                <div style="display:none;">
+                  <ul id="debrief-boundaries"></ul>
+                  <ul id="debrief-evidence"></ul>
+                  <ul id="debrief-guidance"></ul>
+                </div>
+              </div>
+
+              <!-- Evaluation Card (NVIDIA Nemotron evaluator) -->
+              <div id="evaluation-card" class="evaluation-panel" hidden>
+                <span class="eval-title">INDEPENDENT EVALUATOR REPORT</span>
+                <span id="evaluation-status"></span>
+                <span id="evaluation-confidence"></span>
+                <span id="evaluation-risk"></span>
+                <span id="evaluation-safety"></span>
+                <p id="evaluation-summary"></p>
+                <span id="evaluation-tactics"></span>
+                <ul id="evaluation-evidence"></ul>
+              </div>
+
+              <!-- Action to take another case -->
+              <div class="debrief-cta-row">
+                <button id="another-scenario" class="btn-play-again" type="button">
+                  <span class="icon">📁</span>
+                  <span>TAKE ANOTHER CASE FILE</span>
+                </button>
+                <button id="btn-try-again" class="btn-subtle-end" type="button" style="display:none;">Try Again</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
+
     <script type="module" src="/src/app.js"></script>
   </body>
 </html>
