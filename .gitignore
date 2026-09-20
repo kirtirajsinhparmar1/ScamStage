@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+runtime/
+services/api/runtime/
+.DS_Store
+.omx/

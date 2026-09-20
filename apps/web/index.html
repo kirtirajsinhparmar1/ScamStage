@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SCAMSTAGE · Practice spotting the pressure</title>
+    <link rel="stylesheet" href="/src/styles.css">
+  </head>
+  <body>
+    <main>
+      <header><span class="eyebrow">STEELHACKS XIII · FRAUD AWARENESS LAB</span><h1>SCAMSTAGE<span>.</span></h1><p class="intro">Practice spotting the pressure.<br>See how a scam changes when you respond.</p></header>
+      <div class="notice"><strong>Fictional training simulation</strong><p>Every organization and conversation in this lab is invented. Voices are synthetic. Never enter personal information, passwords, account details, payment details, or real one-time codes. Use only fictional responses.</p></div>
+      <div class="workspace">
+        <section class="conversation" aria-labelledby="conversation-heading">
+          <div class="scenario-picker"><label for="scenario">Choose a practice scenario</label><select id="scenario" aria-describedby="scenario-description" disabled><option value="">Loading scenarios…</option></select><p id="scenario-description" class="muted">Explore how different fictional callers respond to your choices.</p></div>
+          <div class="section-heading"><h2 id="conversation-heading">The conversation</h2><button id="start" disabled>Start simulation</button></div>
+          <p id="selected-scenario" class="muted">No active scenario</p>
+          <div id="transcript" role="log" aria-live="polite" aria-label="Conversation transcript"><p class="empty">Choose a scenario and start a simulation. Your choices determine what happens next.</p></div>
+          <section id="debrief" class="debrief" aria-labelledby="debrief-heading" hidden><h2 id="debrief-heading">Training debrief</h2><p id="debrief-outcome"></p><p id="debrief-summary"></p><h3>Safer response guidance</h3><ul id="debrief-guidance"></ul><button id="another-scenario" type="button" class="secondary">Try another scenario</button></section>
+          <div class="playback"><label for="audio">Latest synthetic response</label><audio id="audio" controls preload="none" hidden></audio><p id="audio-status">Audio appears here when available.</p></div>
+          <form id="turn-form"><label for="participant-text">Your fictional response</label><textarea id="participant-text" maxlength="1000" rows="3" placeholder="For example: I will call the number on my card instead." disabled required></textarea><div class="form-footer"><small>Typed input always works. Keep responses fictional.</small><div><button id="microphone" type="button" class="secondary" disabled>Use microphone</button><button id="send" type="submit" disabled>Send response</button></div></div></form>
+          <p id="status" role="status" aria-live="polite">Ready when you are.</p>
+        </section>
+        <aside aria-label="Decision evidence"><section class="insight"><span class="eyebrow">VISIBLE DECISIONS</span><h2>Inside the simulation</h2><p class="muted">Classification informs a fixed scenario engine. Every reply follows a predefined branch.</p><label for="risk">Scenario risk <strong id="risk-value">0%</strong></label><progress id="risk" max="1" value="0"></progress><p class="muted">Training indicator, not a personal assessment.</p><dl><dt>Current stage</dt><dd id="stage">Not started</dd><dt>Caller tactics</dt><dd id="tactics">—</dd><dt>Response classification</dt><dd id="intent">—</dd><dt>Evidence from your response</dt><dd><q id="evidence">—</q></dd><dt>Provider status</dt><dd id="providers">Waiting for a session</dd></dl></section><section class="insight"><h2>Branch timeline</h2><ol id="timeline"><li>No decisions yet</li></ol></section></aside>
+      </div>
+      <footer>Pause whenever you need. This is a learning exercise, and no real bank or payment system is connected.</footer>
+    </main>
+    <script type="module" src="/src/app.js"></script>
+  </body>
+</html>
