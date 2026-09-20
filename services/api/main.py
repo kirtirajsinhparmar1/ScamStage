@@ -13,7 +13,13 @@ from services.api.adapters.nemotron.evaluator import NemotronEvaluator
 from services.api.adapters.ollama_dialogue import OllamaDialogueGenerator
 from services.api.adapters.session_store import InMemorySessionStore
 from services.api.config import ROOT, Settings
-from services.api.domain.orchestrator import DialogueUnavailable, SessionCompleted, SessionNotFound, TurnOrchestrator
+from services.api.domain.orchestrator import (
+    DialogueRetryRequired,
+    DialogueUnavailable,
+    SessionCompleted,
+    SessionNotFound,
+    TurnOrchestrator,
+)
 from services.api.routes import health, scenarios, sessions, turns
 from services.api.scenarios.catalog import ScenarioNotFound
 
@@ -84,20 +90,28 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.exception_handler(SessionCompleted)
     async def completed(request: Request, exc: SessionCompleted):
-        return JSONResponse(status_code=409, content={'detail': 'Simulation completed. Start a new session.'})
+        return JSONResponse(status_code=409, content={'detail': 'Call has ended. Start a new session.'})
+
+    @app.exception_handler(DialogueRetryRequired)
+    async def dialogue_retry_required(request: Request, exc: DialogueRetryRequired):
+        return JSONResponse(status_code=409, content={
+            'detail': 'Caller dialogue is waiting for Retry caller response.',
+            'retry_available': True,
+        })
 
     @app.exception_handler(DialogueUnavailable)
     async def dialogue_unavailable(request: Request, exc: DialogueUnavailable):
         messages = {
-            'ollama_timeout': 'Local caller timed out. Confirm Ollama is running, then restart the simulation.',
-            'ollama_invalid_output': 'Local caller returned an invalid response. Restart the simulation and try again.',
-            'ollama_unavailable': 'Local caller is unavailable. Confirm Ollama is running, then restart the simulation.',
+            'ollama_timeout': 'Local caller timed out. Confirm Ollama is running, then press Retry caller response.',
+            'ollama_invalid_output': 'Local caller returned an invalid response. Press Retry caller response.',
+            'ollama_unavailable': 'Local caller is unavailable. Confirm Ollama is running, then press Retry caller response.',
         }
         return JSONResponse(
             status_code=503,
             content={
                 'detail': messages.get(exc.status, 'Local caller is unavailable. Restart the simulation.'),
                 'dialogue_provider': exc.status,
+                'retry_available': True,
             },
         )
 

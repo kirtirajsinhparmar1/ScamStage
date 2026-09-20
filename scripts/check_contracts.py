@@ -15,7 +15,7 @@ from packages.contracts.turn import TurnRequest
 from services.api.adapters.nemotron.schemas import parse_classification
 from services.api.domain.fallback_classifier import FallbackClassifier
 from services.api.domain.models import ScenarioStage, ScenarioState
-from services.api.domain.scenario_engine import ScenarioEngine
+from services.api.domain.scenario_engine import ACTIVE_STAGES, ScenarioEngine
 
 
 def classification(intent="uncertain", **overrides):
@@ -93,38 +93,36 @@ class ContractChecks(unittest.TestCase):
         with self.assertRaises(ValueError):
             parse_classification(json.dumps({**unsupported, "participant_intent": "invented"}), participant)
 
-    def test_explicit_branch_table(self):
-        intents = ["safe_verification", "skeptical", "uncertain", "compliant", "safe_exit"]
-        expected = {
-            "authority": ["verification_resistance", "urgency", "urgency", "action_request", "safe_exit"],
-            "urgency": ["verification_resistance", "verification_resistance", "action_request", "action_request", "safe_exit"],
-            "verification_resistance": ["safe_exit", "action_request", "action_request", "action_request", "safe_exit"],
-            "action_request": ["safe_exit", "action_request", "risky_outcome", "risky_outcome", "safe_exit"],
-        }
+    def test_rolling_strategy_never_terminalizes(self):
+        cases = [
+            ("safe_verification", "I will verify independently.", "verification_resistance"),
+            ("skeptical", "This sounds suspicious.", "clarification"),
+            ("uncertain", "Hmm", "explanation"),
+            ("compliant", "I will follow those instructions.", "sensitive_request"),
+            ("safe_exit", "I am hanging up.", "release"),
+        ]
         engine = ScenarioEngine()
-        for stage, results in expected.items():
-            for intent, destination in zip(intents, results):
-                with self.subTest(stage=stage, intent=intent):
-                    state = ScenarioState(session_id=str(uuid4()), stage=ScenarioStage(stage))
-                    decision = engine.decide(state, classification(intent))
-                    self.assertEqual(decision.next_stage.value, destination)
-                    self.assertTrue(decision.scammer_text)
-                    self.assertIsInstance(decision.tactics_triggered, list)
-                    self.assertGreaterEqual(decision.risk_score, 0)
-                    self.assertLessEqual(decision.risk_score, 1)
-                    self.assertEqual(decision.completed, destination in {"safe_exit", "risky_outcome"})
+        for intent, participant_text, strategy in cases:
+            with self.subTest(intent=intent):
+                state = ScenarioState(session_id=str(uuid4()), stage=ScenarioStage.authority)
+                decision = engine.decide(state, classification(intent), participant_text)
+                self.assertIn(decision.next_stage, ACTIVE_STAGES)
+                self.assertEqual(decision.strategy, strategy)
+                self.assertFalse(decision.completed)
+                self.assertIsNone(decision.completion_reason)
+                self.assertEqual(decision.scammer_text, "")
+                self.assertIsInstance(decision.tactics_triggered, list)
+                self.assertGreaterEqual(decision.risk_score, 0)
+                self.assertLessEqual(decision.risk_score, 1)
 
-    def test_terminal_stability_and_risk_clamps(self):
+    def test_risk_clamps_without_terminal_engine_states(self):
         engine = ScenarioEngine()
-        for stage in [ScenarioStage.safe_exit, ScenarioStage.risky_outcome]:
-            state = ScenarioState(session_id=str(uuid4()), stage=stage, risk_score=0.4, completed=True)
-            result = engine.decide(state, classification("compliant"))
-            self.assertEqual(result.next_stage, stage)
-            self.assertEqual(result.risk_score, 0.4)
-            self.assertTrue(result.completed)
         for starting_risk, intent, expected_risk in [(0.99, "compliant", 1), (0.01, "safe_exit", 0)]:
             state = ScenarioState(session_id=str(uuid4()), risk_score=starting_risk)
-            self.assertEqual(engine.decide(state, classification(intent)).risk_score, expected_risk)
+            result = engine.decide(state, classification(intent), "demo")
+            self.assertEqual(result.risk_score, expected_risk)
+            self.assertFalse(result.completed)
+            self.assertIn(result.next_stage, ACTIVE_STAGES)
 
 
 class FallbackChecks(unittest.IsolatedAsyncioTestCase):

@@ -1,4 +1,4 @@
-import { createSession, submitTurn } from "./api.js";
+import { createSession, endCall as requestEndCall, retryDialogue, submitTurn } from "./api.js";
 import { playResponse, stopAudio } from "./audio.js";
 
 export const VOICE_STATES = Object.freeze([
@@ -10,13 +10,13 @@ export const VOICE_STATES = Object.freeze([
   "transcribing",
   "submitting",
   "processing",
+  "dialogue_unavailable",
   "paused",
   "terminal",
   "error",
   "text_fallback",
 ]);
 
-const TERMINAL_STAGES = new Set(["safe_exit", "risky_outcome"]);
 const stateLabels = {
   idle: "Ready",
   starting: "Starting call",
@@ -26,8 +26,9 @@ const stateLabels = {
   transcribing: "Transcribing your response",
   submitting: "Sending your response",
   processing: "Preparing the next caller response",
+  dialogue_unavailable: "Caller dialogue unavailable · retry needed",
   paused: "Call paused",
-  terminal: "Training complete",
+  terminal: "Call ended",
   error: "Call error",
   text_fallback: "Text fallback",
 };
@@ -93,14 +94,18 @@ export class VoiceCallController {
     }
     if (this.elements.pause) {
       this.elements.pause.textContent = nextState === "paused" ? "Resume call" : "Pause call";
-      this.elements.pause.disabled = !this.active || ["idle", "starting", "requesting_microphone", "submitting", "processing", "terminal", "error", "text_fallback"].includes(nextState);
+      this.elements.pause.disabled = !this.active || ["idle", "starting", "requesting_microphone", "submitting", "processing", "dialogue_unavailable", "terminal", "error", "text_fallback"].includes(nextState);
     }
     if (this.elements.end) {
-      this.elements.end.disabled = !this.active || ["idle", "starting", "requesting_microphone", "submitting", "processing", "terminal", "error"].includes(nextState);
+      this.elements.end.disabled = !this.active || ["idle", "starting", "requesting_microphone", "submitting", "processing", "terminal"].includes(nextState);
     }
     if (this.elements.continue) {
       this.elements.continue.hidden = !["paused"].includes(nextState);
       this.elements.continue.disabled = !this.active || nextState !== "paused";
+    }
+    if (this.elements.retry) {
+      this.elements.retry.hidden = nextState !== "dialogue_unavailable";
+      this.elements.retry.disabled = !this.active || nextState !== "dialogue_unavailable";
     }
     this.callbacks.onStateChange?.(nextState, { message: message || stateLabels[nextState], ...this._meta(), typedFallback: this.typedFallback });
   }
@@ -190,6 +195,11 @@ export class VoiceCallController {
       if (!this._isCurrent(token)) return;
       this.sessionId = data.session_id;
       this.callbacks.onSession?.(data);
+      if (data.retry_available || !data.scammer_text) {
+        this.setState("dialogue_unavailable", "Caller dialogue is unavailable. Press Retry caller response.");
+        this._setSupport("Ollama did not provide the caller line. The call is preserved; retry when ready.");
+        return;
+      }
       if (this.recognitionType) {
         this.setState("requesting_microphone", "Requesting microphone permission…");
         await this._requestMicrophone(token);
@@ -207,7 +217,12 @@ export class VoiceCallController {
 
   async playCaller(data, token = this.generation, autoListen = true) {
     if (!this._isCurrent(token)) return;
+    if (data.scammer_text === "") {
+      this.setState("dialogue_unavailable", "Caller dialogue is unavailable. Press Retry caller response.");
+      return;
+    }
     this._clearReadDelay();
+    this.finalCaptured = false;
     this.currentAudioUrl = data.audio_url || null;
     this.awaitingContinue = false;
     this.silenceRetries = 0;
@@ -356,15 +371,16 @@ export class VoiceCallController {
       if (!this._isCurrent(token)) return;
       this.turnCount += 1;
       this.callbacks.onTurn?.(data);
-      if (data.completed || TERMINAL_STAGES.has(data.stage_after)) {
-        this._enterTerminal();
-        await this._playTerminalResponse(data, token);
-      } else {
-        await this.playCaller(data, token, !this.typedFallback);
-      }
+      await this.playCaller(data, token, !this.typedFallback);
     } catch (error) {
       if (this._isCurrent(token)) {
-        this.setState("error", "The response could not be submitted. Your fictional text was not sent again.");
+        if (error.dialogueUnavailable) {
+          this.setState("dialogue_unavailable", "Caller dialogue is unavailable. Press Retry caller response.");
+          this._setSupport(error.message);
+          this.callbacks.onDialogueUnavailable?.(error);
+        } else {
+          this.setState("error", "The response could not be submitted. Your fictional text was not sent again.");
+        }
         this.callbacks.onError?.(error);
       }
     } finally {
@@ -372,34 +388,16 @@ export class VoiceCallController {
     }
   }
 
-  async _playTerminalResponse(data, token) {
-    this.currentAudioUrl = data.audio_url || null;
-    if (!data.audio_url) {
-      if (this.elements.audioStatus) this.elements.audioStatus.textContent = "Text-only mode: review the fictional terminal response.";
-      return;
-    }
-    await playResponse(this.elements.audio, this.elements.audioStatus, data.audio_url, {
-      onEnded: () => {
-        if (this._isCurrent(token) && this.state === "terminal") this.setState("terminal", "Training complete · review the debrief");
-      },
-      onBlocked: () => {
-        if (this._isCurrent(token)) this.setState("terminal", "Training complete · press Play to hear the caller, then review the debrief");
-      },
-      onError: () => {
-        if (this._isCurrent(token)) this.setState("terminal", "Training complete · review the transcript and debrief");
-      },
-    });
-  }
-
   _enterTerminal() {
     this._abortRecognition();
     this._clearTimer();
+    if (this.elements.audio) stopAudio(this.elements.audio);
     this.awaitingContinue = false;
-    this.setState("terminal", "Training complete · review the debrief");
+    this.setState("terminal", "Call ended · review the debrief");
   }
 
   async submitTyped(text) {
-    if (!this.active || !this.typedFallback || this.state === "terminal") return;
+    if (!this.active || !this.typedFallback || this.state === "terminal" || this.state === "dialogue_unavailable") return;
     await this._submitTranscript(text, "text", this.generation);
   }
 
@@ -439,8 +437,52 @@ export class VoiceCallController {
     await this.playCaller({ audio_url: this.currentAudioUrl }, token, !this.typedFallback);
   }
 
+  async retryCaller() {
+    if (!this.active || this.state !== "dialogue_unavailable" || !this.sessionId) return;
+    const token = this.generation;
+    this.setState("processing", "Retrying the Ollama caller response…");
+    this.submissionInFlight = true;
+    try {
+      const data = await retryDialogue(this.sessionId);
+      if (!this._isCurrent(token)) return;
+      if (data.turn_id) {
+        this.turnCount += 1;
+        this.callbacks.onTurn?.(data);
+      } else {
+        this.callbacks.onRetry?.(data);
+      }
+      await this.playCaller(data, token, !this.typedFallback);
+    } catch (error) {
+      if (this._isCurrent(token)) {
+        this.setState("dialogue_unavailable", "Caller dialogue is unavailable. Press Retry caller response.");
+        this._setSupport(error.message || "Ollama did not provide a caller response.");
+        this.callbacks.onDialogueUnavailable?.(error);
+      }
+    } finally {
+      this.submissionInFlight = false;
+    }
+  }
+
   async endCall() {
     if (!this.active || this.state === "terminal" || this.submissionInFlight) return;
-    await this._submitTranscript("I am going to hang up and call the official number myself.", "text", this.generation);
+    const token = this.generation;
+    this._abortRecognition();
+    this._clearTimer();
+    if (this.elements.audio) stopAudio(this.elements.audio);
+    this.setState("processing", "Ending the fictional call safely…");
+    this.submissionInFlight = true;
+    try {
+      const data = await requestEndCall(this.sessionId);
+      if (!this._isCurrent(token)) return;
+      this._enterTerminal();
+      this.callbacks.onEnded?.(data);
+    } catch (error) {
+      if (this._isCurrent(token)) {
+        this.setState("error", "The call could not be ended yet. Try End call safely again.");
+        this.callbacks.onError?.(error);
+      }
+    } finally {
+      this.submissionInFlight = false;
+    }
   }
 }

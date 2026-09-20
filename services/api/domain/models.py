@@ -16,8 +16,9 @@ class VoiceResult(BaseModel):
 
 class ScenarioDecision(BaseModel):
     next_stage: ScenarioStage
-    scammer_text: str
+    strategy: str = 'authority'
+    scammer_text: str = ''
     tactics_triggered: list[str]
     risk_score: float = Field(ge=0, le=1)
-    completed: bool
+    completed: bool = False
     completion_reason: str | None = None

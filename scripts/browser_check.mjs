@@ -11,8 +11,19 @@ const live = args.includes('--require-live');
 const checkTimeoutLabel = args.includes('--check-timeout-label');
 assert(!live || !checkTimeoutLabel, 'Timeout-label fixture is only for the fallback server');
 const singleSession = args.includes('--single-session');
-const scenarioId = option('--scenario-id', live ? 'fictional_job_recruiter_v1' : null);
+const scenarioId = option('--scenario-id', live ? 'fictional_bank_fraud_v1' : null);
 assert(!live || singleSession, '--require-live requires --single-session; test the branch matrix on the fallback server');
+const liveResponses = [
+  'What exactly is this alert about?',
+  'How do I know you are really from the credit union?',
+  'I am uncomfortable continuing this conversation.',
+  'I will call the number on my card instead.',
+  'I am just going to hang up.',
+];
+const offlineResponses = [
+  'I will call the official number myself.',
+  'I will not continue this call.',
+];
 // Covers the adapter's maximum two-attempt budget plus voice synthesis.
 const readyTimeout = live ? 260000 : 55000;
 const pages = await (await fetch(`${cdp}/json`)).json();
@@ -81,16 +92,17 @@ try {
   await call('Page.navigate', { url:base });
   await until("document.querySelectorAll('#scenario option').length === 3 && !document.getElementById('start').disabled");
   if (checkTimeoutLabel) {
-    // Only inject the sanitized reason on an already-declared fallback response.
-    // Branch, evidence, risk, and debrief remain the real deterministic API output.
+    // Only inject a sanitized dialogue status on an otherwise valid response.
+    // Strategy, evidence, risk, and end-call behavior remain the real API output.
     await evaluate(`(() => {
       const originalFetch = window.fetch.bind(window);
       window.fetch = async (...request) => {
         const response = await originalFetch(...request);
         if (!String(request[0]).endsWith('/turns') || !response.ok) return response;
         const data = await response.clone().json();
-        if (data.classifier_fallback !== true) throw new Error('Timeout fixture requires fallback server');
-        data.classifier_fallback_reason = 'timeout';
+        data.dialogue_provider = 'ollama_timeout';
+        data.dialogue_fallback = true;
+        data.dialogue_fallback_reason = 'timeout';
         return new Response(JSON.stringify(data), {status:response.status, headers:{'Content-Type':'application/json'}});
       };
     })()`);
@@ -100,37 +112,48 @@ try {
   const selected = scenarioId ? scenarios.filter(scenario => scenario.id === scenarioId) : scenarios;
   assert(selected.length > 0, 'Requested scenario is not in the picker');
   for (const scenario of singleSession ? selected.slice(0, 1) : selected) {
-    for (const risky of singleSession ? [false] : [false, true]) {
-      await evaluate(`document.getElementById('another-scenario').click(); document.getElementById('scenario').value=${JSON.stringify(scenario.id)}; document.getElementById('scenario').dispatchEvent(new Event('change')); document.getElementById('start').click()`);
+    await evaluate(`document.getElementById('another-scenario').click(); document.getElementById('scenario').value=${JSON.stringify(scenario.id)}; document.getElementById('scenario').dispatchEvent(new Event('change')); document.getElementById('${live ? 'start-voice' : 'start'}').click()`);
+    if (live) {
+      await until("document.getElementById('voice-call').hidden === false");
+      await evaluate("document.getElementById('voice-text-fallback').click()");
+      await until("!document.getElementById('participant-text').disabled && document.getElementById('voice-end').disabled === false");
+    } else {
       await until("!document.getElementById('start').disabled && !document.getElementById('participant-text').disabled");
-      assert((await text('selected-scenario')).includes(scenario.name));
-      await audioCheck();
-      for (const response of risky ? ['I will follow those instructions.', 'I will follow those instructions.'] : ['I am hanging up.']) {
-        await evaluate(`document.getElementById('participant-text').value=${JSON.stringify(response)}; document.getElementById('turn-form').requestSubmit()`);
-        await until("!document.getElementById('start').disabled");
-        if (live) {
-          assert((await text('providers')).includes('nemotron'));
-          assert((await text('providers')).includes('elevenlabs'));
-          assert(!(await text('providers')).toLowerCase().includes('fallback'));
-        }
-        if (checkTimeoutLabel) {
-          assert((await text('providers')).includes('Classifier: deterministic fallback (timeout)'));
-        }
-        await audioCheck();
-      }
-      const outcome = live ? await text('stage') : risky ? 'risky outcome' : 'safe exit';
-      if (!live) assert.equal(await text('stage'), outcome);
-      const terminal = ['safe exit', 'risky outcome'].includes(outcome);
-      if (terminal) {
-        assert((await text('debrief-heading')).includes(scenario.name));
-        assert((await text('debrief-outcome')).includes(outcome));
-      }
-      const timeline = await text('timeline');
-      assert(timeline.includes(outcome) && timeline.includes('confidence') && timeline.includes('evidence:'));
-      assert.equal(await evaluate("document.getElementById('send').disabled"), terminal);
-      assert.equal(await evaluate("document.getElementById('debrief').hidden"), !terminal);
-      console.log(`PASS browser: ${scenario.id} ${outcome}${live ? ' + live classification/audio playback' : ''}`);
     }
+    assert((await text('selected-scenario')).includes(scenario.name));
+    await audioCheck();
+    const responses = live ? liveResponses : offlineResponses;
+    for (const response of responses) {
+      await evaluate(`document.getElementById('participant-text').value=${JSON.stringify(response)}; document.getElementById('turn-form').requestSubmit()`);
+      if (live) {
+        await until("document.getElementById('voice-end').disabled === false && document.getElementById('participant-text').disabled === false && document.getElementById('transcript').textContent.includes('Simulated caller')");
+        assert((await text('providers')).includes('Safety policy: fast_safety_policy'));
+        assert((await text('providers')).includes('Caller dialogue: Ollama'));
+        assert((await text('providers')).includes('Voice: ElevenLabs'));
+        assert(!(await text('providers')).toLowerCase().includes('unavailable'));
+      } else {
+        await until("!document.getElementById('start').disabled && !document.getElementById('participant-text').disabled");
+      }
+      if (checkTimeoutLabel) {
+        assert((await text('providers')).includes('Caller dialogue: Ollama timeout'));
+      }
+      assert.equal(await evaluate("document.getElementById('debrief').hidden"), true);
+      await audioCheck();
+    }
+    if (live) {
+      await evaluate("document.getElementById('voice-end').click()");
+      await until("document.getElementById('debrief').hidden === false && document.getElementById('voice-end').disabled === true");
+    } else {
+      await evaluate("document.getElementById('text-end').click()");
+      await until("document.getElementById('debrief').hidden === false && document.getElementById('send').disabled === true");
+    }
+    assert((await text('debrief-heading')).includes(scenario.name));
+    assert((await text('debrief-outcome')).includes('user ended call'));
+    const timeline = await text('timeline');
+    assert(timeline.includes('confidence') && timeline.includes('evidence:'));
+    assert(timeline.includes('Call ended safely by participant'));
+    assert.equal(await evaluate("document.getElementById('debrief').hidden"), false);
+    console.log(`PASS browser: ${scenario.id} explicit end${live ? ' + five live Ollama/ElevenLabs voice-mode turns' : ''}`);
   }
   await evaluate('window.scrollTo(0,0)');
   const shot = await call('Page.captureScreenshot', { format:'png', captureBeyondViewport:true });

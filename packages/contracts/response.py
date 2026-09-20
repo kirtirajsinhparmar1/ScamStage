@@ -22,6 +22,10 @@ class SessionResponse(BaseModel):
     tactics_triggered: list[str] = Field(default_factory=lambda: ['authority'])
     dialogue_provider: str = 'authored_fallback'
     dialogue_fallback: bool = True
+    dialogue_fallback_reason: str | None = None
+    strategy: str = 'authority'
+    call_active: bool = True
+    retry_available: bool = False
 
 
 class Debrief(BaseModel):
@@ -31,6 +35,11 @@ class Debrief(BaseModel):
     safer_response_guidance: list[str]
     completion_reason: str | None = None
     tactics_observed: list[str] = Field(default_factory=list)
+    training_risk_score: float = Field(default=0.2, ge=0, le=1)
+    boundaries_set: list[str] = Field(default_factory=list)
+    verification_requested: bool = False
+    evidence: list[str] = Field(default_factory=list)
+    safer_response_examples: list[str] = Field(default_factory=list)
     evaluation_status: EvaluationStatus | None = None
     evaluation_provider: str | None = None
     evaluation_result: IndependentEvaluation | None = None
@@ -42,6 +51,7 @@ class TurnResponse(BaseModel):
     analysis: ParticipantClassification
     stage_before: ScenarioStage
     stage_after: ScenarioStage
+    strategy: str = 'authority'
     risk_score: float = Field(ge=0, le=1)
     tactics_triggered: list[str]
     scammer_text: str
@@ -60,6 +70,22 @@ class TurnResponse(BaseModel):
     dialogue_provider: str = 'authored_fallback'
     dialogue_fallback: bool = True
     dialogue_fallback_reason: str | None = None
+    retry_available: bool = False
+
+
+class EndCallResponse(BaseModel):
+    session_id: str
+    scenario_id: str
+    scenario_name: str
+    stage: ScenarioStage
+    strategy: str
+    risk_score: float = Field(ge=0, le=1)
+    completed: bool = True
+    call_active: bool = False
+    completion_reason: str = 'user_ended_call'
+    debrief: Debrief
+    timeline: list[dict] = Field(default_factory=list)
+    simulation_notice: str = SIMULATION_NOTICE
 
 
 class SessionDetail(ScenarioState):

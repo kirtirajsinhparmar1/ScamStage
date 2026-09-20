@@ -30,6 +30,7 @@ class TurnRecord(BaseModel):
     classification: ParticipantClassification
     stage_before: str
     stage_after: str
+    strategy: str = 'authority'
     risk_before: float = Field(default=0.2, ge=0, le=1)
     risk_score: float = Field(ge=0, le=1)
     scammer_text: str
